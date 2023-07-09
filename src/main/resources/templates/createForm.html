@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Create Form</title>
+    <link rel="stylesheet" href="/assets/main.css" />
+  </head>
+  <body>
+    <div
+      class="question-card"
+      style="background: rgb(151, 201, 172)"
+      id="form-info"
+    >
+      <h2>Form Information</h2>
+      <label for="title-field">Form Title:</label><br />
+      <input id="title-field" type="text" class="textinput" /><br />
+      <label for="description-field">Form Description:</label><br />
+      <textarea id="description-field" rows="4" cols="200"></textarea><br />
+      <button onclick="setFormInfo()">Set Information</button>
+    </div>
+    <div id="form-container"></div>
+    <div
+      id="field-creator"
+      class="question-card"
+      style="background: rgb(151, 201, 172)"
+    >
+      <h2>Add Question</h2>
+      <p>
+        You can add new questions here, or click Done if you've finished
+        creating your form.
+      </p>
+      <label for="question-title">Question Title:</label>
+      <input type="text" id="question-title" class="textinput" /><br />
+      <label for="question-description"
+        >Question Description: <small>(optional)</small></label
+      >
+      <textarea
+        name="question-description"
+        id="question-description"
+        cols="200"
+        rows="4"
+      ></textarea>
+      <p>Question Type:</p>
+      <input
+        id="tffield-type"
+        type="radio"
+        name="field-type"
+        value="TEXT_FIELD"
+      />
+      <label for="tffield-type">Text Field</label> <br />
+      <input
+        id="mcfield-type"
+        type="radio"
+        name="field-type"
+        value="MULTIPLE_CHOICE"
+      />
+      <label for="mcfield-type">Multiple Choice</label><br />
+      <input
+        id="cbfield-type"
+        type="radio"
+        name="field-type"
+        value="CHECKBOXES"
+      />
+      <label for="cbfield-type">Checkbox</label>
+      <br />
+      <div id="options">
+        <p>Options:</p>
+        <div id="options-display"></div>
+        <input id="sample-input" />
+        <input id="option-name" type="text" />
+        <button id="addOption" onclick="addOption()">Add Option</button>
+      </div>
+      <button onclick="addNewField()">Add Question</button>
+      <button onclick="submitForm()">Done!</button>
+    </div>
+    <div id="processing-element" class="question-card">
+      <h1>PROCESSING!</h1>
+    </div>
+    <div id="success-element" class="question-card">
+      <h1>SUCCESS!</h1>
+      <p>Link:</p>
+    </div>
+    <div id="error-element" class="question-card">
+      <h1>ERROR!</h1>
+    </div>
+    <input id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"></input>
+    <script src="/assets/formRenderer.js"></script>
+    <script>
+      let form = { fields: [] };
+      let formContainer = document.querySelector("#form-container");
+      let fieldCreator = document.querySelector("#field-creator");
+      let fieldOptions = document.querySelector("#options");
+      let sampleInput = document.getElementById("sample-input");
+      let fieldValues = null;
+      let textFieldButton = document.getElementById("tffield-type");
+      let checkboxButton = document.getElementById("cbfield-type");
+      let multipleChoiceButton = document.getElementById("mcfield-type");
+      let processingElement = document.getElementById("processing-element");
+      let successElement = document.getElementById("success-element");
+      let errorElement = document.getElementById("error-element");
+      fieldCreator.hidden = true;
+      fieldOptions.hidden = true;
+      processingElement.hidden = true;
+      successElement.hidden = true;
+      errorElement.hidden = true;
+
+      document.querySelector("#tffield-type").onclick = () => {
+        fieldOptions.hidden = true;
+        fieldValues = null;
+      };
+      document.getElementById("cbfield-type").onclick = () => {
+        sampleInput.setAttribute("type", "checkbox");
+        fieldValues = [];
+        fieldOptions.hidden = false;
+      };
+      document.getElementById("mcfield-type").onclick = () => {
+        sampleInput.setAttribute("type", "radio");
+        fieldValues = [];
+        fieldOptions.hidden = false;
+      };
+
+      function rerenderForm() {
+        if (formContainer.firstChild)
+          formContainer.removeChild(formContainer.firstChild);
+        formContainer.appendChild(renderForm(form));
+      }
+
+      function setFormInfo() {
+        form.formName = document.querySelector("#title-field").value;
+        form.description = document.querySelector("#description-field").value;
+        if (!form.formName) {
+          alert("Form title cannot be empty!");
+          return;
+        }
+
+        rerenderForm();
+
+        document.querySelector("#form-info").hidden = true;
+        fieldCreator.hidden = false;
+      }
+
+      function addOption() {
+        if (!fieldValues) {
+          alert("Error");
+          return;
+        }
+
+        let optionNameInputField = document.getElementById("option-name");
+        fieldValues.push(optionNameInputField.value);
+
+        let targetDiv = document.getElementById("options-display");
+        let inputField = document.createElement("input");
+        inputField.setAttribute(
+          "type",
+          checkboxButton.checked ? "checkbox" : "radio"
+        );
+        inputField.setAttribute("id", optionNameInputField.value);
+        targetDiv.appendChild(inputField);
+        let label = document.createElement("label");
+        label.setAttribute("for", optionNameInputField.value);
+        label.textContent = optionNameInputField.value;
+        targetDiv.appendChild(label);
+        targetDiv.appendChild(document.createElement("br"));
+        optionNameInputField.value = "";
+      }
+
+      // adds new field to form object, resets input card.
+      function addNewField() {
+        let field = {};
+        let titleInputField = document.getElementById("question-title");
+        let descriptionInputField = document.getElementById(
+          "question-description"
+        );
+
+        field.title = titleInputField.value;
+        field.description = descriptionInputField.value;
+
+        if (multipleChoiceButton.checked || checkboxButton.checked) {
+          field.type = multipleChoiceButton.checked
+            ? "MULTIPLE_CHOICE"
+            : "CHECKBOXES";
+          if (fieldValues === null) {
+            alert("At least one option must be provided");
+            return;
+          } else {
+            field.values = fieldValues;
+            fieldValues = null;
+          }
+        } else {
+          field.type = "TEXT_FIELD";
+        }
+
+        form.fields.push(field);
+        document.getElementById("options-display").replaceChildren();
+        checkboxButton.checked = false;
+        multipleChoiceButton.checked = false;
+        textFieldButton.checked = false;
+        titleInputField.value = "";
+        descriptionInputField.value = "";
+        fieldOptions.hidden = true;
+        rerenderForm();
+        // title, description, type: (CHECKBOXES, MULTIPLE_CHOICE, TEXT_FIELD) and values (nullable)
+      }
+
+      function submitForm() {
+        formContainer.hidden = true;
+        fieldCreator.hidden = true;
+        processingElement.hidden = false;
+
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == XMLHttpRequest.DONE) {
+            processingElement.hidden = true;
+            if (xhr.status === 200 && xhr.response) {
+              if (xhr.response == "-1") {
+                errorElement.hidden=false;
+              } else { 
+                let link = document.createElement("a");
+                link.setAttribute("href", "/form/" + xhr.response);
+                link.textContent = "www.onlineForms.com/form/" + xhr.response;
+                successElement.appendChild(link);
+                successElement.hidden = false;
+              }
+            } else errorElement.hidden = false;
+            
+          }
+        };
+
+        let csrfToken = document.getElementById("csrfToken");
+
+        xhr.open("POST", "/createForm");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken.getAttribute("value"));
+        xhr.send(JSON.stringify(form));
+      }
+    </script>
+  </body>
+</html>

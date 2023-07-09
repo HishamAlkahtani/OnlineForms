@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="assets/main.css" />
+    <style>
+      button {
+        width: auto;
+        display: inline-block;
+      }
+
+      .form-card {
+        -webkit-box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.49);
+        -moz-box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.49);
+        box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.49);
+        padding: 20px;
+        border-radius: 5px;
+        background: rgb(111, 136, 161);
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="question-card">
+      <h1>Welcome!</h1>
+    </div>
+    <div class="question-card">
+      <h2>Your forms:</h2>
+      <div th:each="form: ${forms}" class="form-card">
+        <div class="formId" th:attr="data-form-id=${form.formId}">
+          <a th:href="@{/form/{id}(id=${form.formId})}"
+            ><h3 th:text="${form.formName}"></h3
+          ></a>
+          <button>View Responses</button>
+          <button>Export Excel</button>
+          <button>Export JSON</button>
+        </div>
+      </div>
+      <button style="width: 100%; margin-top: 10px;" onclick="location.href = '/createForm'">
+        Create Form
+      </button>
+      <button style="width: 100%" onclick="location.href = '/logout'">
+        logout
+      </button>
+    </div>
+    <script>
+      let formContainers = document.getElementsByClassName("formId");
+      for (let i in formContainers) {
+        let container = formContainers[i];
+
+        let thisFormId = container.getAttribute("data-form-id");
+        let buttons = container.querySelectorAll("button");
+        buttons[0].onclick = () => {
+          location.href = "/responses/" + thisFormId;
+        };
+        buttons[1].onclick = () => {
+          location.href = "/responsesExcel/" + thisFormId;
+        };
+        buttons[2].onclick = () => {
+          location.href = "/responsesRaw/" + thisFormId;
+        };
+      }
+    </script>
+  </body>
+</html>

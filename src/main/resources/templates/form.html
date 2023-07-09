@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Form</title>
+    <link rel="stylesheet" href="/assets/main.css" />
+  </head>
+  <body>
+    <div id="load-form"></div>
+    <div class="question-card" id="loading-card">
+      <h1>Loading Form...</h1>
+      <input id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"></input>
+    </div>
+
+    <!-- Now that you have formId.... You can request getForm/formId by JS
+and get form details and render everythin using javascript -->
+    <script th:inline="javascript">
+      formId = [[${formId}]];
+    </script>
+    <script src="/assets/formRenderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Loading Responses...</title>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px black solid;
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="question-card" id="loading-card">
+      <h1>Loading Responses...</h1>
+    </div>
+
+    <script th:inline="javascript">
+         formId = [[${formId}]];
+    </script>
+    <script src="/assets/responseRenderer.js"></script>
+  </body>
+</html>

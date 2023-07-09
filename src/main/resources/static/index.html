@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Online Forms</title>
+    <link rel="stylesheet" href="/assets/main.css" />
+  </head>
+  <body>
+    <div class="question-card center">
+      <h1 style="width: 24rem; margin: auto">Welcome to online forms!</h1>
+      <br />
+      <div class="spacer">
+        <div onclick="window.location.href = '/login';" class="div-button">
+          Login
+        </div>
+        <div onclick="window.location.href= '/register';" class="div-button">
+          Register
+        </div>
+      </div>
+    </div>
+    <script>
+      let authentication = fetch("/isLoggedIn", { credentials: "same-origin" });
+      authentication
+        .then((arg) => arg.json())
+        .then((json) => {
+          if (json.isLoggedIn) window.location.href = "/userDashboard";
+        });
+    </script>
+  </body>
+</html>
